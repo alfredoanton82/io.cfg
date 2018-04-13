@@ -21,13 +21,13 @@ for f in $(find . -type f | grep -v .git); do
 
   mkdir -p $(dirname $target) && cp -v $f $target
 
-  for keyvalue in $(grep -v "\#" $keys_file | grep -v "^$"); do
-    key=$(echo $keyvalue | cut -d "=" -f 1)
-    val=$(echo $keyvalue | cut -d "=" -f 2)
+  while read keyvalue; do
+    key="$(echo $keyvalue | cut -d '=' -f 1)"
+    val="$(echo $keyvalue | cut -d '=' -f 2-)"
 
     sed -i "s/@${key}@/${val}/g" $target
 
-  done
+  done < <(grep -v "\#" $keys_file | grep -v "^$")
 
 done
 
