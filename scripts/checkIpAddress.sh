@@ -10,9 +10,9 @@ HOSTNAME_LIST="@server@"
 DNS_SERVER_LIST="1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4"
 
 #Configuration
-NO_IP_USER="@noip-user@"
-NO_IP_PASSWD="@noip-pwd@"
-NO_IP_DOMAIN="@noip-domain@"
+NO_IP_USER="@noip_user@"
+NO_IP_PASSWD="@noip_pwd@"
+NO_IP_DOMAIN="@noip_domain@"
 NO_IP_UPDADD="http://dynupdate.no-ip.com/nic/update?hostname=@HOSTNAME@&myip=@IP@"
 NO_IP_USERAGENT="No-IP_Updater_$HOSTNAME/1.0_$NO_IP_USER"
 NO_IP_REQUIRED_INTERVAL=30 # days

@@ -3,14 +3,14 @@ clientName=$1
 
 CURR_PATH=$PWD
 
-LIST_CLIENTS="hyperion phobos ltamas tbmrst cmrst tbfjam cfjam"
+LIST_CLIENTS=@list_vpn_clients@
 
 # Configuration
-SERVER_NAME=$(hostname)
-SERVER_ADDRESS=$SERVER_NAME.ddns.net
-SERVER_PORT=36063
-VPN_IP=192.168.20.0
-DNS_IP=192.168.2.4
+SERVER_NAME=@server@
+SERVER_ADDRESS=@server@.@noip_domain@
+SERVER_PORT=@vpn_port@
+VPN_IP=@vpn_ip@
+DNS_IP=@server_ip@
 
 CLIENT_PATH=/root/ovpn/client
 SERVER_PATH=/root/ovpn/server
