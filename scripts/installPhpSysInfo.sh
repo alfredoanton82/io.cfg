@@ -28,7 +28,7 @@ echo ""
 echo "Setting configuration file"
 cp -vf /root/config/phpsysinfo.ini ${currVer}/phpsysinfo.ini
 
-ln -sf $currVer phpsysinfo
+ln -sf ../$currVer /var/www/html/phpsysinfo
 
 chown -R www-data:www-data $currVer phpsysinfo
 chmod -R o-w $currVer phpsysinfo
