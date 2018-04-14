@@ -12,7 +12,7 @@ alias ls='ls $LS_OPTIONS'
 alias ll='ls $LS_OPTIONS -l'
 alias l='ls $LS_OPTIONS -lA'
 
-export GREP_OPTIONS='--color=auto'
+alias grep='grep --color=auto'
 
 #
 # Some more alias to avoid making mistakes:
