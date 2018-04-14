@@ -35,8 +35,8 @@ cp -vf $CONFIG_PATH/var/www/phpsysinfo/phpsysinfo.ini ${currVer}/phpsysinfo.ini
 ln -sf ../$currVer /var/www/html/phpsysinfo
 
 # Update rights
-chown -R www-data:www-data $currVer phpsysinfo
-chmod -R o-w $currVer phpsysinfo
+chown -R www-data:www-data $currVer
+chmod -R o-w $currVer
 
 echo ""
 echo "Restarting nginx"
