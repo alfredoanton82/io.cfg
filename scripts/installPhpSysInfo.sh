@@ -1,7 +1,7 @@
 #/bin/bash
 
 # Define configuration path
-CONFIG_PATH=/root/@server@.cfg
+CONFIG_PATH=/root/@server@.cfg/config
 
 cd /var/www/
 
