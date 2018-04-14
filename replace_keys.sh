@@ -1,21 +1,21 @@
 #!/bin/bash
 
-if [[ $# -ne 2 ]] || [ ! -f $1 ]; then
-  echo "Usage: $0 <keys-file> <target-path>"
+if [[ $# -ne 1 ]] || [ ! -f $1 ]; then
+  echo "Usage: $0 <keys-file>"
   exit 1
 fi
 
 keys_file=$1
-targetpath=$2
 
-# Goto configuration directory
-cd $(dirname $0)
+# Get server name (configuration fixed path)
+server=$(grep @server@ $keys_file | cut -d '=' -f 2)
+targetpath=/root/$server.cfg
 
 # Creating path directory
 rm -rf $targetpath && mkdir -p $targetpath
 
 # Loop on files
-for f in $(find . -type f | grep -v .git); do
+for f in $(find $(dirname $0) -type f | grep -v .git); do
 
   target=$targetpath/$f
 

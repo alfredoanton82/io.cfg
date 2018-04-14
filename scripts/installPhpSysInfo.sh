@@ -1,5 +1,8 @@
 #/bin/bash
 
+# Define configuration path
+CONFIG_PATH=/root/@server@.cfg
+
 cd /var/www/
 
 echo "Installing PhpSysInfo"
@@ -26,14 +29,16 @@ currVer=$(ls -d phpsysinfo-*)
 # Copy configuration file
 echo ""
 echo "Setting configuration file"
-cp -vf /root/config/phpsysinfo.ini ${currVer}/phpsysinfo.ini
+cp -vf $CONFIG_PATH/var/www/phpsysinfo/phpsysinfo.ini ${currVer}/phpsysinfo.ini
 
+# Link folder to nginx default configuration
 ln -sf ../$currVer /var/www/html/phpsysinfo
 
+# Update rights
 chown -R www-data:www-data $currVer phpsysinfo
 chmod -R o-w $currVer phpsysinfo
 
-
 echo ""
-echo "Restarting apache"
-/etc/init.d/nginx restart
+echo "Restarting nginx"
+systemctl restart nginx
+systemctl status  nginx
