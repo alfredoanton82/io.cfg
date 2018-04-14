@@ -8,7 +8,7 @@ fi
 keys_file=$1
 
 # Get server name (configuration fixed path)
-server=$(grep @server@ $keys_file | cut -d '=' -f 2)
+server=$(grep "^server=" $keys_file | cut -d '=' -f 2)
 targetpath=/root/$server.cfg
 
 # Creating path directory
