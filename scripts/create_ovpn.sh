@@ -10,7 +10,7 @@ SERVER_NAME=@server@
 SERVER_ADDRESS=@server@.@noip_domain@
 SERVER_PORT=@vpn_port@
 VPN_IP=@vpn_ip@
-DNS_IP=@server_ip@
+DNS_IP=@vpn_ip@
 
 CLIENT_PATH=/root/ovpn/client
 SERVER_PATH=/root/ovpn/server
@@ -86,51 +86,73 @@ create_server() {
 
 generate_server() {
 
-  # Copy generated keys 
-  cp $SERVER_PATH/ta.key                          $OPENVPN_CFG
-  cp $SERVER_PATH/dh2048.pem                      $OPENVPN_CFG
-  cp $SERVER_PATH/pki/ca.crt                      $OPENVPN_CFG
-  cp $SERVER_PATH/pki/private/$SERVER_NAME.key    $OPENVPN_CFG
-  cp $SERVER_PATH/pki/issued/$SERVER_NAME.crt     $OPENVPN_CFG
+  echo "Generating Server..."
 
-  ovpnconf=$OPENVPN_CFG/server.conf
+  # Copy generated keys
+  echo "Copying Server keys..." 
+  cp -v $SERVER_PATH/ta.key                          $OPENVPN_CFG
+  cp -v $SERVER_PATH/dh2048.pem                      $OPENVPN_CFG
+  cp -v $SERVER_PATH/pki/ca.crt                      $OPENVPN_CFG
+  cp -v $SERVER_PATH/pki/private/$SERVER_NAME.key    $OPENVPN_CFG
+  cp -v $SERVER_PATH/pki/issued/$SERVER_NAME.crt     $OPENVPN_CFG
+
+  echo "Creating Server Configuration..."
+  echo "Server Address: $SERVER_ADDRESS:$SERVER_PORT"
+  echo "Server VPN IP : $VPN_IP"
+
+  ovpnconf=$SERVER_PATH/server.conf
+  rm -f $ovpnconf
 
   # Server configuration
-  echo "port $SERVER_PORT"                             >$ovpnconf
-  echo "proto udp"                                     >>$ovpnconf
-  echo "dev tun"                                       >>$ovpnconf
-  echo "ca ca.crt"                                     >>$ovpnconf
-  echo "cert $SERVER_NAME.crt"                         >>$ovpnconf
-  echo "key $SERVER_NAME.key"                          >>$ovpnconf
-  echo "tls-auth ta.key 0"                             >>$ovpnconf
-  echo "dh dh2048.pem"                                 >>$ovpnconf
-  echo "server ${VPN_IP} 255.255.255.0"                >>$ovpnconf
-  echo "cipher AES-256-CBC"                            >>$ovpnconf
-  echo "persist-key"                                   >>$ovpnconf
-  echo "persist-tun"                                   >>$ovpnconf
-  echo "user nobody"                                   >>$ovpnconf
-  echo "group nogroup"                                 >>$ovpnconf
-  echo "status openvpn-status.log"                     >>$ovpnconf
-  echo "verb 3"                                        >>$ovpnconf
-  echo "route ${VPN_IP} 255.255.255.0"                 >>$ovpnconf
-  echo "push \"redirect-gateway def1\""                >>$ovpnconf
-  echo "push \"dhcp-option DNS ${DNS_IP}\""            >>$ovpnconf
-  echo "push \"dhcp-option DOMAIN-SEARCH saturn.net\"" >>$ovpnconf
-  echo "push \"route ${VPN_IP} 255.255.255.0\""        >>$ovpnconf
-  echo "keepalive 5 30"                                >>$ovpnconf
+  echo "port $SERVER_PORT"                               >$ovpnconf
+  echo "proto udp"                                       >>$ovpnconf
+  echo "dev tun"                                         >>$ovpnconf
+  echo "ca ca.crt"                                       >>$ovpnconf
+  echo "cert $SERVER_NAME.crt"                           >>$ovpnconf
+  echo "key $SERVER_NAME.key"                            >>$ovpnconf
+  echo "tls-auth ta.key 0"                               >>$ovpnconf
+  echo "dh dh2048.pem"                                   >>$ovpnconf
+  echo ""                                                >>$ovpnconf
+ # echo "server ${VPN_IP} 255.255.255.0"                >>$ovpnconf
+  echo "mode server"                                     >>$ovpnconf
+  echo "tls-server"                                      >>$ovpnconf
+  echo "topology subnet"                                 >>$ovpnconf
+  echo "ifconfig ${VPN_IP} 255.255.255.0"                >>$ovpnconf
+  echo "ifconfig-pool ${VPN_IP%.*}.100 ${VPN_IP%.*}.199" >>$ovpnconf
+  echo ""                                                >>$ovpnconf
+  echo "cipher AES-256-CBC"                              >>$ovpnconf
+  echo "persist-key"                                     >>$ovpnconf
+  echo "persist-tun"                                     >>$ovpnconf
+  echo "user nobody"                                     >>$ovpnconf
+  echo "group nogroup"                                   >>$ovpnconf
+  echo "status openvpn-status.log"                       >>$ovpnconf
+  echo "verb 3"                                          >>$ovpnconf
+  echo ""                                                >>$ovpnconf
+  echo "push \"topology subnet\""                        >>$ovpnconf
+  echo "push \"route-gateway ${VPN_IP}\""                >>$ovpnconf
+  echo "push \"redirect-gateway def1\""                  >>$ovpnconf
+  echo "push \"dhcp-option DNS ${DNS_IP}\""              >>$ovpnconf
+  echo "push \"dhcp-option DOMAIN-SEARCH saturn.net\""   >>$ovpnconf
+  echo "keepalive 5 30"                                  >>$ovpnconf
 
-  fwconf=/usr/local/bin/firewall.sh
+  cp -v $ovpnconf $OPENVPN_CFG
+
+  echo "Creating firewall configuration..."
+  fwconf=$SERVER_PATH/firewall.sh
+  rm -f $fwconf
 
   # Firewall configuration
-  echo "#!/bin/bash"                                                          >$fwconf
-  echo "iptables -t filter -F"                                                >>$fwconf
-  echo "iptables -t nat -F"                                                   >>$fwconf
-  echo "iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT"   >>$fwconf
-  echo "iptables -A FORWARD -s \"${VPN_IP}/24\" -j ACCEPT"                    >>$fwconf
-  echo "iptables -A FORWARD -j REJECT"                                        >>$fwconf
-  echo "iptables -t nat -A POSTROUTING -s \"${VPN_IP}/24\" -j MASQUERADE"     >>$fwconf
+  echo "#!/bin/bash"                                                               >$fwconf
+  echo "iptables -t filter -F"                                                     >>$fwconf
+  echo "iptables -t nat -F"                                                        >>$fwconf
+  echo "iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT"        >>$fwconf
+  echo "iptables -A FORWARD -s \"${VPN_IP%.*}.0/24\" -j ACCEPT"                    >>$fwconf
+  echo "iptables -A FORWARD -j REJECT"                                             >>$fwconf
+  echo "iptables -t nat -A POSTROUTING -s \"${VPN_IP%.*}.0/24\" -j MASQUERADE"     >>$fwconf
 
   chmod +x $fwconf
+
+  cp -v $fwconf /usr/local/bin
 
   grep -q "/usr/local/bin/firewall.sh" /etc/rc.local
   if [ $? != 0 ]; then
